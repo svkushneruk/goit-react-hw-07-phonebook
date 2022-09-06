@@ -1,41 +1,38 @@
 import React from 'react';
-import { nanoid } from 'nanoid';
-import { addContact, removeContact, setFilter } from 'Redux/contactsSlice';
+import {
+  useFetchContactsQuery,
+  useDeleteContactMutation,
+  useCreateContactMutation,
+} from 'Redux/contacts/contactsSlice';
 import ContactForm from 'components/ContactForm/ContactForm';
 import { Filter } from 'components/Filter/Filter';
 import { ContactList } from 'components/ContactList/ContactList';
 import css from 'components/App.module.css';
-
-import { useSelector, useDispatch } from 'react-redux/es/exports';
+import { useState } from 'react';
 
 const App = () => {
-  const dispatch = useDispatch();
-  const contacts = useSelector(state => state.contacts.items);
-  const filter = useSelector(state => state.contacts.filter);
+  const [filter, setFilter] = useState('');
+  const { data } = useFetchContactsQuery();
+  const [deleteContact] = useDeleteContactMutation();
+  const [createContact] = useCreateContactMutation();
 
   const handleAddContact = data => {
     if (checkName(data.name)) {
       alert(`${data.name} is already in contacts`);
       return;
     } else {
-      dispatch(
-        addContact({ id: nanoid(), name: data.name, number: data.number })
-      );
+      createContact(data);
     }
   };
 
   const getVisiableContacts = () => {
-    return contacts.filter(({ name }) =>
+    return data.filter(({ name }) =>
       name.toLowerCase().includes(filter.toLowerCase())
     );
   };
 
-  const deleteContact = contactId => {
-    return dispatch(removeContact(contactId));
-  };
-
   const checkName = filterName => {
-    const arr = contacts.filter(({ name }) => name === filterName);
+    const arr = data.filter(({ name }) => name === filterName);
     if (arr.length > 0) {
       return true;
     }
@@ -51,13 +48,15 @@ const App = () => {
 
       <Filter
         filterValue={filter}
-        onChange={e => dispatch(setFilter(e.currentTarget.value))}
+        onChange={e => setFilter(e.currentTarget.value)}
       />
 
-      <ContactList
-        contacts={getVisiableContacts()}
-        onDeleteContact={deleteContact}
-      />
+      {data && (
+        <ContactList
+          contacts={getVisiableContacts().reverse()}
+          onDeleteContact={deleteContact}
+        />
+      )}
     </div>
   );
 };
