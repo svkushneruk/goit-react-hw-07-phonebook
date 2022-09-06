@@ -1,14 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   useFetchContactsQuery,
   useDeleteContactMutation,
   useCreateContactMutation,
-} from 'Redux/contacts/contactsSlice';
+} from 'redux/contacts/contactsSlice';
 import ContactForm from 'components/ContactForm/ContactForm';
 import { Filter } from 'components/Filter/Filter';
 import { ContactList } from 'components/ContactList/ContactList';
 import css from 'components/App.module.css';
-import { useState } from 'react';
 
 const App = () => {
   const [filter, setFilter] = useState('');
