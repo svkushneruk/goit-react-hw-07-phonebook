@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import {
   useFetchContactsQuery,
-  useDeleteContactMutation,
   useCreateContactMutation,
 } from 'redux/contacts/contactsSlice';
 import ContactForm from 'components/ContactForm/ContactForm';
@@ -11,8 +11,7 @@ import css from 'components/App.module.css';
 
 const App = () => {
   const [filter, setFilter] = useState('');
-  const { data } = useFetchContactsQuery();
-  const [deleteContact] = useDeleteContactMutation();
+  const { data, error, isError } = useFetchContactsQuery();
   const [createContact] = useCreateContactMutation();
 
   const handleAddContact = data => {
@@ -21,6 +20,7 @@ const App = () => {
       return;
     } else {
       createContact(data);
+      Notify.success('Contact added');
     }
   };
 
@@ -50,12 +50,10 @@ const App = () => {
         onChange={e => setFilter(e.currentTarget.value)}
       />
 
-      {data && (
-        <ContactList
-          contacts={getVisiableContacts().reverse()}
-          onDeleteContact={deleteContact}
-        />
-      )}
+      {isError && <p>{error.data}</p>}
+      {data && data.length === 0 && <p>No any contacts</p>}
+
+      {data && <ContactList contacts={getVisiableContacts().reverse()} />}
     </div>
   );
 };
